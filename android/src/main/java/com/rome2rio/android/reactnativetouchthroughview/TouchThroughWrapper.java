@@ -12,6 +12,8 @@ import android.view.View;
 import android.graphics.Rect;
 import android.view.ViewGroup;
 
+import java.util.Timer;
+
 public class TouchThroughWrapper extends ReactViewGroup implements ReactHitSlopView {
     private boolean lastTouchWasNotValid = false;
 
@@ -25,13 +27,26 @@ public class TouchThroughWrapper extends ReactViewGroup implements ReactHitSlopV
         return lastTouchWasNotValid;
     }
 
+    private void retrySetActivityListener(final ReactContext context) {
+        new java.util.Timer().schedule( 
+            new java.util.TimerTask() {
+                @Override
+                public void run() {
+                    setActivityListener(context);
+                }
+            }, 
+        200);
+    }
+
     private void setActivityListener(ReactContext context) {
         if (context == null) {
             return;
         }
 
         Activity activity = context.getCurrentActivity();
+
         if (activity == null) {
+            retrySetActivityListener(context);
             return;
         }
 
@@ -40,6 +55,7 @@ public class TouchThroughWrapper extends ReactViewGroup implements ReactHitSlopV
         if (activity instanceof TouchThroughTouchHandlerInterface) {
             TouchThroughTouchHandlerInterface handlerInterface = (TouchThroughTouchHandlerInterface) activity;
             handlerInterface.getTouchThroughTouchHandler().setListener(new TouchThroughTouchHandlerListener() {
+                
                 @Override
                 void handleTouch(MotionEvent ev) {
                     if (ev.getAction() == MotionEvent.ACTION_DOWN) {
