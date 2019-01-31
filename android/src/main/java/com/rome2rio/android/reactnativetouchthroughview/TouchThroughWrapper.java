@@ -11,8 +11,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.graphics.Rect;
 import android.view.ViewGroup;
+import android.os.Handler;
 
-import java.util.Timer;
+
 
 public class TouchThroughWrapper extends ReactViewGroup implements ReactHitSlopView {
     private boolean lastTouchWasNotValid = false;
@@ -28,14 +29,12 @@ public class TouchThroughWrapper extends ReactViewGroup implements ReactHitSlopV
     }
 
     private void retrySetActivityListener(final ReactContext context) {
-        new java.util.Timer().schedule( 
-            new java.util.TimerTask() {
-                @Override
-                public void run() {
-                    setActivityListener(context);
-                }
-            }, 
-        200);
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setActivityListener(context);
+            }
+        }, 200);
     }
 
     private void setActivityListener(ReactContext context) {
